@@ -26,7 +26,7 @@ public class FileCounter : MonoBehaviour
 
     public async void OnSelectDirectoryPressed()
     {
-        path = await Helper.SelectFile(FileBrowser.PickMode.Folders);
+        path = await Helper.SelectFile(FileBrowser.PickMode.Folders, null);
         selectionButtonTextField.text =
             string.Format("Directory = {0}\nClick the button to select a directory...", !string.IsNullOrEmpty(path) ? path : "Null");
         OnCountButtonPressed();
@@ -78,7 +78,7 @@ public class FileCounter : MonoBehaviour
     public async void OnSaveButtonPressed()
     {
         if (string.IsNullOrEmpty(path) || string.IsNullOrEmpty(outputTextField.text)) return;
-        path = await Helper.SelectFile(FileBrowser.PickMode.Folders);
+        path = await Helper.SelectFile(FileBrowser.PickMode.Folders, path);
         DirectoryInfo directoryInfo = new DirectoryInfo(path);
         StreamWriter streamWriter = new StreamWriter(Path.Combine(directoryInfo.FullName, $"{directoryInfo.Name}_Report.txt"));
         streamWriter.WriteLine(outputTextField.text);

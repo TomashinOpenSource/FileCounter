@@ -8,9 +8,9 @@ using UnityEngine;
 
 public class Helper : MonoBehaviour
 {
-    public static async Task<string> SelectFile(FileBrowser.PickMode pickMode)
+    public static async Task<string> SelectFile(FileBrowser.PickMode pickMode, string initialPath)
     {
-        await FileBrowser.WaitForLoadDialog(pickMode);
+        await FileBrowser.WaitForLoadDialog(pickMode, initialPath:initialPath);
         if (FileBrowser.Success)
         {
             return FileBrowser.Result[0];
