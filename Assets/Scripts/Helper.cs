@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using SimpleFileBrowser;
@@ -15,5 +16,14 @@ public class Helper : MonoBehaviour
             return FileBrowser.Result[0];
         }
         else return null;
+    }
+    public static int FolderDepth(string path)
+    {
+        if (string.IsNullOrEmpty(path))
+            return 0;
+        DirectoryInfo parent = Directory.GetParent(path);
+        if (parent == null)
+            return 1;
+        return FolderDepth(parent.FullName) + 1;
     }
 }

@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using SimpleFileBrowser;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class FileCounter : MonoBehaviour
@@ -18,7 +19,6 @@ public class FileCounter : MonoBehaviour
     [Header("State")]
     [SerializeField] private string path;
     [SerializeField] private int depth;
-    [SerializeField] private List<string> paths;
 
     public string Path
     {
@@ -46,6 +46,7 @@ public class FileCounter : MonoBehaviour
     public async void OnSelectDirectoryPressed()
     {
         Path = await Helper.SelectFile(FileBrowser.PickMode.Folders);
+        OnCountButtonPressed();
     }
 
     public void OnInputCountDepth(string value)
@@ -55,22 +56,42 @@ public class FileCounter : MonoBehaviour
 
     public void OnCountButtonPressed()
     {
-        paths = Directory.GetFiles(Path, "*.*", SearchOption.AllDirectories).ToList();
-        int pathDepth = FolderDepth(Path);
-        if (Depth > 0) paths = paths.Where(path => (FolderDepth(path) - pathDepth) <= Depth).ToList();
+        CountFilesInEachFolder();
+    }
+
+    private void CountAllFilesInDirectory()
+    {
+        List<string> paths = Directory.GetFiles(Path, "*.*", SearchOption.AllDirectories).ToList();
+        int pathDepth = Helper.FolderDepth(Path);
+        if (Depth > 0) paths = paths.Where(path => (Helper.FolderDepth(path) - pathDepth) <= Depth).ToList();
         outputTextField.text = $"Directory = {Path}\nDepth = {Depth}\nFiles = {paths.Count}\n\n";
         for (int i = 0; i < paths.Count; i++)
         {
-            outputTextField.text += $"{i + 1} - {paths[i]} - Depth = {FolderDepth(paths[i]) - pathDepth}\n";
+            outputTextField.text += $"{i + 1} - {paths[i]} - Depth = {Helper.FolderDepth(paths[i]) - pathDepth}\n";
         }
     }
-    public static int FolderDepth(string path)
+
+    private void CountFilesInEachFolder()
     {
-        if (string.IsNullOrEmpty(path))
-            return 0;
-        DirectoryInfo parent = Directory.GetParent(path);
-        if (parent == null)
-            return 1;
-        return FolderDepth(parent.FullName) + 1;
+        List<DirectoryData> directoryDatas = GetDirectoryDatas(Path);
+        outputTextField.text = "";
+        foreach (var directoryData in directoryDatas)
+        {
+            outputTextField.text += directoryData.Show() + "\n";
+        }
+    }
+    private List<DirectoryData> GetDirectoryDatas(string _path)
+    {
+        DirectoryInfo directoryInfo = new DirectoryInfo(_path);
+        List<DirectoryData> directoryDatas = new List<DirectoryData>();
+        int directoriesCount = directoryInfo.GetDirectories().Length;
+        int filesCount = directoryInfo.GetFiles().Length;
+        if (filesCount > 0) directoryDatas.Add(new DirectoryData(_path));
+        foreach (var directories in directoryInfo.GetDirectories())
+        {
+            directoryDatas.AddRange(GetDirectoryDatas(directories.FullName));
+        }
+
+        return directoryDatas;
     }
 }
